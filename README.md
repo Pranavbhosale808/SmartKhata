@@ -48,6 +48,5 @@ This system helps vendors **create itemized bills, manage products, track custom
 | **invoice_items** | Stores list of products sold inside an invoice. |
 | **payments** | Stores full/partial payment entries for invoices. |
 
-### Example Entity Relationship Diagram (Text Overview)
 
 

@@ -40,13 +40,16 @@ This system helps vendors **create itemized bills, manage products, track custom
 
 ## 🗂 Database Design (Core Tables)
 
-| Table | Purpose |
-|------|---------|
-| **users** | Stores vendor and customer details (role-based). |
-| **products** | Stores product details for each vendor. |
-| **invoices** | Stores bill header info (customer, total, status). |
-| **invoice_items** | Stores list of products sold inside an invoice. |
-| **payments** | Stores full/partial payment entries for invoices. |
+| Table Name        | Description |
+|-------------------|-------------|
+| **users**         | Stores personal and contact information for any person in the system (vendors or customers). |
+| **vendors**       | Represents a business/shop and links to a user; owns products, customers, and invoices. |
+| **customers**     | Stores vendor-specific customer profiles for billing and credit/owe tracking. |
+| **products**      | Contains all products created by a vendor, including name, unit, and price. |
+| **invoices**      | Represents a sale/invoice with totals, status (paid/partial/owed), and customer reference. |
+| **invoice_items** | Stores line-item product details within each invoice (snapshot of qty, price, description). |
+| **payments**      | Records all payments made toward invoices; supports partial and multiple payments. |
+
 
 
 

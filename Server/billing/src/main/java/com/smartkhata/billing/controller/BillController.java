@@ -14,7 +14,8 @@ import java.util.List;
 public class BillController {
 
     private final BillService billService;
-
+    
+    //For creating a bill
     @PostMapping
     public ResponseEntity<BillResponseDTO> create(
             @PathVariable Integer vendorId,

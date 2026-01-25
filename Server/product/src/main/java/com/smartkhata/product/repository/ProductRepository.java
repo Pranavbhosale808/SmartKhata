@@ -12,7 +12,7 @@ import java.util.Optional;
 
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-	 Optional<Product> findByIdAndVendorId(Long id, Long vendorId);
+	    Optional<Product> findByIdAndVendorId(Long id, Long vendorId);
 
 	    Page<Product> findAllByVendorIdAndIsActiveTrue(Long vendorId,Pageable pageable);
 

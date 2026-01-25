@@ -24,8 +24,9 @@ public class BillController {
                 billService.createBill(vendorId, dto),
                 HttpStatus.CREATED
         );
-    } // create bill
+    } 
 
+    // add
     @GetMapping
     public ResponseEntity<List<BillResponseDTO>> getAll(
             @PathVariable Integer vendorId) {
@@ -43,7 +44,7 @@ public class BillController {
         return ResponseEntity.ok(
                 billService.getBill(vendorId, invoiceId)
         );
-    } // get single bill
+    } // get a single bill
 
     @PutMapping("/{invoiceId}")
     public ResponseEntity<BillResponseDTO> update(

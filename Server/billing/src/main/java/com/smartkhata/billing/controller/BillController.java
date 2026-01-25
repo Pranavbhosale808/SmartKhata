@@ -14,8 +14,7 @@ import java.util.List;
 public class BillController {
 
     private final BillService billService;
-    
-    //For creating a bill
+
     @PostMapping
     public ResponseEntity<BillResponseDTO> create(
             @PathVariable Integer vendorId,
@@ -25,7 +24,7 @@ public class BillController {
                 billService.createBill(vendorId, dto),
                 HttpStatus.CREATED
         );
-    }
+    } // create bill
 
     @GetMapping
     public ResponseEntity<List<BillResponseDTO>> getAll(
@@ -34,7 +33,7 @@ public class BillController {
         return ResponseEntity.ok(
                 billService.getBillsByVendor(vendorId)
         );
-    }
+    } // get all bills
 
     @GetMapping("/{invoiceId}")
     public ResponseEntity<BillResponseDTO> getOne(
@@ -44,7 +43,7 @@ public class BillController {
         return ResponseEntity.ok(
                 billService.getBill(vendorId, invoiceId)
         );
-    }
+    } // get single bill
 
     @PutMapping("/{invoiceId}")
     public ResponseEntity<BillResponseDTO> update(
@@ -55,7 +54,7 @@ public class BillController {
         return ResponseEntity.ok(
                 billService.updateBill(vendorId, invoiceId, dto)
         );
-    }
+    } // update bill
 
     @DeleteMapping("/{invoiceId}")
     public ResponseEntity<Void> delete(
@@ -64,5 +63,5 @@ public class BillController {
 
         billService.deleteBill(vendorId, invoiceId);
         return ResponseEntity.noContent().build();
-    }
+    } // delete bill
 }

@@ -65,3 +65,6 @@ const DeleteConfirmModal = ({ product, onClose, onSuccess }) => {
 };
 
 export default DeleteConfirmModal;
+
+
+

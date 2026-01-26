@@ -5,7 +5,7 @@ const api = axios.create({
 });
 
 const headers = {
-  "X-Vendor-Id": 1,
+  "X-Vendor-Id": 1, 
 };
 
 export const getProducts = (pageNumber, pageSize) =>

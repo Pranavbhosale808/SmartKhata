@@ -2,7 +2,6 @@ package com.smartkhata.product.service.impl;
 
 import com.smartkhata.product.dto.ProductDto;
 import com.smartkhata.product.dto.ProductUpdateDto;
-
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
@@ -10,15 +9,15 @@ import java.math.BigDecimal;
 public interface ProductService {
 
     // CREATE
-    ProductDto create(ProductDto dto);
+    ProductDto create(ProductDto dto, Long vendorId);
 
-    // UPDATE
-    ProductDto update(Long id, ProductUpdateDto dto);
+    // UPDATE (vendor-safe)
+    ProductDto update(Long id, ProductUpdateDto dto, Long vendorId);
 
-    // DELETE
-    void delete(Long id);
+    // DELETE (vendor-safe)
+    void delete(Long id, Long vendorId);
 
-    //  PAGINATION 
+    // PAGINATION
     Page<ProductDto> getProductsByVendor(
             Long vendorId,
             int page,

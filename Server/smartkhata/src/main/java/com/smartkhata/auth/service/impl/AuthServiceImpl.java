@@ -6,12 +6,10 @@ import com.smartkhata.auth.repository.UserRepository;
 import com.smartkhata.auth.repository.VendorRepository;
 import com.smartkhata.common.exception.BadRequestException;
 import com.smartkhata.common.exception.ResourceNotFoundException;
+import com.smartkhata.auth.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.smartkhata.auth.security.JwtUtil;
-
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +18,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final VendorRepository vendorRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-
 
     @Override
     public AuthResponseDto ownerSignup(OwnerSignupDto dto) {
@@ -42,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
+                .password(dto.getPassword()) // ❌ no encryption
                 .role(Role.OWNER)
                 .vendor(vendor)
                 .build();
@@ -65,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
         User user = User.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
+                .password(dto.getPassword()) // ❌ no encryption
                 .role(Role.STAFF)
                 .vendor(vendor)
                 .build();
@@ -81,7 +77,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        
+        if (!dto.getPassword().equals(user.getPassword())) {
             throw new BadRequestException("Invalid email or password");
         }
 
@@ -93,7 +90,8 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateAccessToken(
                 user.getId(),
                 user.getVendor().getId(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getName()   
         );
 
         return AuthResponseDto.builder()

@@ -1,17 +1,13 @@
 package com.smartkhata.billing.dto;
 
-import lombok.*;
-
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class BillItemDto {
+import lombok.Getter;
+import lombok.Setter;
 
-    private Long billItemId;
+@Getter @Setter
+public class BillItemResponseDto {
+
     private Long productId;
     private String description;
     private BigDecimal unitPriceSnapshot;

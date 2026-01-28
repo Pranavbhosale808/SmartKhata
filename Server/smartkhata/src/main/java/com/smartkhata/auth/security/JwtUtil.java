@@ -10,28 +10,45 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET = "SMARTKHATA_SECRET_KEY_123456789_SMARTKHATA";
-    private static final long ACCESS_TOKEN_EXPIRATION = 15 * 60 * 1000;
-    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
+    private static final String SECRET =
+            "SMARTKHATA_SECRET_KEY_123456789_SMARTKHATA";
+
+    private static final long ACCESS_TOKEN_EXPIRATION =
+            15 * 60 * 1000; // 15 minutes
+
+    private static final long REFRESH_TOKEN_EXPIRATION =
+            7 * 24 * 60 * 60 * 1000; // 7 days
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateAccessToken(Long userId, Long vendorId, String role) {
+    
+    public String generateAccessToken(
+            Long userId,
+            Long vendorId,
+            String role,
+            String name
+    ) {
         return Jwts.builder()
                 .setSubject(userId.toString())
                 .claim("vendorId", vendorId)
                 .claim("role", role)
+                .claim("name", name)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION)
+                )
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // 🔁 REFRESH TOKEN
     public String generateRefreshToken(Long userId) {
         return Jwts.builder()
                 .setSubject(userId.toString())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION)
+                )
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -54,6 +71,10 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return getClaims(token).get("role", String.class);
+    }
+
+    public String extractName(String token) {
+        return getClaims(token).get("name", String.class);
     }
 
     public boolean validate(String token) {

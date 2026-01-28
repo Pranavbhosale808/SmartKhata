@@ -1,32 +1,24 @@
 package com.smartkhata.billing.dto;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
-
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class BillItemCreateDto {
 
-    @NotNull(message = "Product ID is required")
+    @NotNull
     private Long productId;
 
-    @NotBlank(message = "Description is required")
-    private String description;
-
-    @NotNull(message = "Unit price is required")
-    @DecimalMin(value = "0.01", message = "Unit price must be greater than zero")
+    @NotNull
+    @DecimalMin("0.01")
     private BigDecimal unitPriceSnapshot;
 
-    @NotNull(message = "Quantity is required")
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @Min(1)
     private Integer quantity;
-
-    @NotNull(message = "Line total is required")
-    @DecimalMin(value = "0.01", message = "Line total must be greater than zero")
-    private BigDecimal lineTotal;
 }
+

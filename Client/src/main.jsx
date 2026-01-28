@@ -5,9 +5,12 @@ import App from './App.jsx'
 import { Toaster } from "react-hot-toast";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { VendorProvider } from './context/VendorContext';
+
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+     <VendorProvider>
     <App />
      <ToastContainer
       position="top-right"
@@ -25,5 +28,7 @@ createRoot(document.getElementById('root')).render(
         },
       }}
     />
+ </VendorProvider>
+
   </StrictMode>
 )

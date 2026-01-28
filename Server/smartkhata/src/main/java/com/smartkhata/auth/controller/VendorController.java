@@ -1,8 +1,11 @@
 package com.smartkhata.auth.controller;
 
 import com.smartkhata.auth.dto.VendorDto;
+import com.smartkhata.auth.dto.VendorResponseDto;
 import com.smartkhata.auth.service.impl.VendorService;
 import com.smartkhata.common.response.ApiResponse;
+import com.smartkhata.common.security.VendorContext;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,4 +65,16 @@ public class VendorController {
                 .message("Vendor deleted successfully")
                 .build();
     }
+
+    @GetMapping("/me")
+    public ApiResponse<VendorResponseDto> getMyVendor() {
+    	 System.out.println("aale");
+        Long vendorId = VendorContext.getVendorId();
+       
+        return ApiResponse.success(
+                vendorService.getById(vendorId)
+        );
+    }
+    
+   
 }

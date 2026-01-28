@@ -1,24 +1,48 @@
-import axios from "axios";
+import api from "../utils/axios";
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-});
-
-const headers = {
-  "X-Vendor-Id": 1, 
-};
-
-export const getProducts = (pageNumber, pageSize) =>
+export const getProducts = ({
+  page = 0,
+  size = 10,
+  sortBy = "name",
+  sortDir = "asc",
+} = {}) =>
   api.get("/products", {
-    params: { pageNumber, pageSize },
-    headers,
+    params: { page, size, sortBy, sortDir },
+  });
+
+export const searchProducts = ({
+  keyword,
+  page = 0,
+  size = 10,
+}) =>
+  api.get("/products/search", {
+    params: { keyword, page, size },
+  });
+
+export const filterProductsByPrice = ({
+  minPrice,
+  maxPrice,
+  page = 0,
+  size = 10,
+}) =>
+  api.get("/products/price-range", {
+    params: { minPrice, maxPrice, page, size },
+  });
+
+export const getLowStockProducts = ({
+  threshold = 5,
+  page = 0,
+  size = 10,
+}) =>
+  api.get("/products/low-stock", {
+    params: { threshold, page, size },
   });
 
 export const createProduct = (data) =>
-  api.post("/products", data, { headers });
+  api.post("/products", data);
 
 export const updateProduct = (id, data) =>
-  api.put(`/products/${id}`, data, { headers });
+  api.put(`/products/${id}`, data);
 
 export const deleteProduct = (id) =>
-  api.delete(`/products/${id}`, { headers });
+  api.delete(`/products/${id}`);

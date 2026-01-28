@@ -1,28 +1,20 @@
 package com.smartkhata.billing.service.impl;
 
+import java.time.LocalDate;
+
+import org.springframework.data.domain.Page;
+
 import com.smartkhata.billing.dto.BillCreateDto;
 import com.smartkhata.billing.dto.BillDto;
 import com.smartkhata.billing.dto.BillUpdateDto;
 
-import org.springframework.data.domain.Page;
-
-import java.time.LocalDate;
-
 public interface BillService {
 
-    BillDto create(BillCreateDto dto);
+    // -------- CREATE --------
+    BillDto create(BillCreateDto dto, Long vendorId);
 
-    BillDto update(Long id, BillUpdateDto  dto);
-
-    BillDto getById(Long id);
-
-    void delete(Long id);
-
-    Page<BillDto> getBills(
-            Long vendorId,
-            int page,
-            int size
-    );
+    // -------- READ --------
+    BillDto getById(Long billId, Long vendorId);
 
     Page<BillDto> getBillsWithSort(
             Long vendorId,
@@ -46,4 +38,17 @@ public interface BillService {
             int page,
             int size
     );
+
+    // -------- UPDATE --------
+    BillDto update(Long billId, BillUpdateDto dto, Long vendorId);
+
+    // -------- DELETE --------
+    void delete(Long billId, Long vendorId);
+
+    // -------- CREDIT FLOW --------
+    void settleCredit(Long billId, Long vendorId);
+
+    // -------- PAYMENT GATEWAY HOOK --------
+    void markPaidAfterGateway(Long billId, String orderId);
 }
+

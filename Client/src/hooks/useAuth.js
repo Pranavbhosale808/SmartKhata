@@ -1,29 +1,21 @@
-import { loginApi, registerApi } from "@/api/authApi";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export const useAuth = () => {
+  const navigate = useNavigate();
 
-  const login = async (payload) => {
-    const res = await loginApi(payload);
-    saveSession(res.data);
-    return res.data;
-  };
-
-  const register = async (payload) => {
-    const res = await registerApi(payload);
-    saveSession(res.data);
-    return res.data;
+  const login = (res) => {
+    localStorage.setItem("token", res.token);
+    localStorage.setItem("user", JSON.stringify(res));
+    toast.success("Login successful");
+    navigate("/dashboard");
   };
 
   const logout = () => {
     localStorage.clear();
+    toast.success("Logged out");
+    navigate("/login");
   };
 
-  const saveSession = (data) => {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("userId", data.userId);
-    localStorage.setItem("tenantId", data.tenantId);
-    localStorage.setItem("role", data.role);
-  };
-
-  return { login, register, logout };
+  return { login, logout };
 };

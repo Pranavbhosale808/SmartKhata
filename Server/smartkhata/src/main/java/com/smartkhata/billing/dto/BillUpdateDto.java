@@ -1,28 +1,32 @@
 package com.smartkhata.billing.dto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-import lombok.*;
-
-import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 public class BillUpdateDto {
 
-    private Long customerId;
+    @NotNull
+    private LocalDate billDate;
 
-    @NotNull(message = "Total amount is required")
-    @DecimalMin(value = "0.01", message = "Total amount must be greater than zero")
-    private BigDecimal totalAmount;
+    @NotBlank
+    private String customerName;
 
-    @NotBlank(message = "Status is required")
-    private String status;
+    @NotBlank
+    @Pattern(regexp = "^[6-9]\\d{9}$")
+    private String customerMobile;
 
-    @NotEmpty(message = "Bill must contain at least one item")
-    private List<@Valid BillItemUpdateDto> items;
+    @NotBlank
+    private String status; // PAID / CREDIT
+
+    @NotEmpty
+    private List<@Valid BillItemCreateDto> items;
 }

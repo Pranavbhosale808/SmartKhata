@@ -23,16 +23,21 @@ public class ProductServiceImpl implements ProductService {
 
     // CREATE
     @Override
-    public ProductDto create(ProductDto dto) {
+    public ProductDto create(ProductDto dto, Long vendorId) {
         Product product = mapper.map(dto, Product.class);
-        return mapper.map(productRepository.save(product), ProductDto.class);
+        product.setVendorId(vendorId);
+
+        Product saved = productRepository.save(product);
+        return mapper.map(saved, ProductDto.class);
     }
 
-    // UPDATE
+    // UPDATE (vendor-safe)
     @Override
-    public ProductDto update(Long id, ProductUpdateDto dto) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+    public ProductDto update(Long id, ProductUpdateDto dto, Long vendorId) {
+        Product product = productRepository
+                .findByIdAndVendorId(id, vendorId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Product not found"));
 
         product.setName(dto.getName());
         product.setPrice(dto.getPrice());
@@ -41,14 +46,18 @@ public class ProductServiceImpl implements ProductService {
         return mapper.map(productRepository.save(product), ProductDto.class);
     }
 
-
-    // DELETE
+    // DELETE (vendor-safe)
     @Override
-    public void delete(Long id) {
-        productRepository.deleteById(id);
+    public void delete(Long id, Long vendorId) {
+        Product product = productRepository
+                .findByIdAndVendorId(id, vendorId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Product not found"));
+
+        productRepository.delete(product);
     }
 
-    // PAGINATION (BASIC)
+    // PAGINATION
     @Override
     public Page<ProductDto> getProductsByVendor(
             Long vendorId,
@@ -57,11 +66,12 @@ public class ProductServiceImpl implements ProductService {
     ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        return productRepository.findByVendorId(vendorId, pageable)
+        return productRepository
+                .findByVendorId(vendorId, pageable)
                 .map(p -> mapper.map(p, ProductDto.class));
     }
 
-    // PAGINATION + SORTING
+    // PAGINATION + SORT
     @Override
     public Page<ProductDto> getProductsWithSort(
             Long vendorId,
@@ -76,11 +86,12 @@ public class ProductServiceImpl implements ProductService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return productRepository.findByVendorId(vendorId, pageable)
+        return productRepository
+                .findByVendorId(vendorId, pageable)
                 .map(p -> mapper.map(p, ProductDto.class));
     }
 
-    // SEARCH BY NAME
+    // SEARCH
     @Override
     public Page<ProductDto> searchProducts(
             Long vendorId,
@@ -97,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(p -> mapper.map(p, ProductDto.class));
     }
 
-    //FILTER BY PRICE RANGE
+    // PRICE RANGE
     @Override
     public Page<ProductDto> filterByPrice(
             Long vendorId,
@@ -115,7 +126,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(p -> mapper.map(p, ProductDto.class));
     }
 
-    // LOW STOCK (PAGINATED)
+    // LOW STOCK
     @Override
     public Page<ProductDto> getLowStockProducts(
             Long vendorId,

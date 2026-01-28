@@ -1,39 +1,64 @@
-import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Home from "./pages/Home";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Products from "./pages/Products";
+import Bills from "./pages/Bills";
+import Payments from "./pages/Payments";
+import { isAuthenticated } from "./utils/auth";
+import Overview from "./pages/Overview";
+import CreateBill from "./pages/CreateBill";
 
-import HomePage from "./pages/HomePage";
-import ProductsPage from "./pages/ProductsPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+const ProtectedRoute = ({ children }) =>
+  isAuthenticated() ? children : <Navigate to="/login" replace />;
 
-import ProtectedRoute from "./components/ProtectedRoute";
-
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
 
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-
-        {/* Protected Routes */}
         <Route
-          path="/products"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <ProductsPage />
+              <Overview />
             </ProtectedRoute>
           }
         />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route
+          path="/dashboard/products"
+          element={
+            <ProtectedRoute>
+              <Products />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/bills"
+          element={
+            <ProtectedRoute>
+              <Bills />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/payments"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/bills" element={<Bills />} />
+        <Route path="/bills/create" element={<CreateBill />} />
 
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;

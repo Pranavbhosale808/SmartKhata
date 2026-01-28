@@ -2,10 +2,10 @@ package com.smartkhata.product.controller;
 
 import com.smartkhata.common.response.ApiResponse;
 import com.smartkhata.common.response.PageResponse;
+import com.smartkhata.common.security.VendorContext;
 import com.smartkhata.product.dto.ProductDto;
 import com.smartkhata.product.dto.ProductUpdateDto;
 import com.smartkhata.product.service.impl.ProductService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,23 +22,25 @@ public class ProductController {
 
     // 🔹 1. CREATE PRODUCT
     @PostMapping
-    public ApiResponse<ProductDto> createProduct(@Valid @RequestBody ProductDto dto) {
-        return ApiResponse.<ProductDto>builder()
-                .success(true)
-                .message("Product created successfully")
-                .data(productService.create(dto))
-                .build();
+    public ApiResponse<ProductDto> createProduct(
+            @Valid @RequestBody ProductDto dto
+    ) {
+        Long vendorId = VendorContext.getVendorId();
+        return ApiResponse.success(
+                productService.create(dto, vendorId)
+        );
     }
 
     // 🔹 2. GET PRODUCTS (Pagination + Sorting)
     @GetMapping
     public ApiResponse<PageResponse<ProductDto>> getProducts(
-            @RequestParam Long vendorId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
+        Long vendorId = VendorContext.getVendorId();
+
         Page<ProductDto> productPage =
                 productService.getProductsWithSort(
                         vendorId, page, size, sortBy, sortDir
@@ -50,11 +52,12 @@ public class ProductController {
     // 🔹 3. SEARCH PRODUCT BY NAME
     @GetMapping("/search")
     public ApiResponse<PageResponse<ProductDto>> searchProducts(
-            @RequestParam Long vendorId,
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        Long vendorId = VendorContext.getVendorId();
+
         Page<ProductDto> productPage =
                 productService.searchProducts(
                         vendorId, keyword, page, size
@@ -66,12 +69,13 @@ public class ProductController {
     // 🔹 4. FILTER BY PRICE RANGE
     @GetMapping("/price-range")
     public ApiResponse<PageResponse<ProductDto>> filterByPrice(
-            @RequestParam Long vendorId,
             @RequestParam BigDecimal minPrice,
             @RequestParam BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        Long vendorId = VendorContext.getVendorId();
+
         Page<ProductDto> productPage =
                 productService.filterByPrice(
                         vendorId, minPrice, maxPrice, page, size
@@ -83,11 +87,12 @@ public class ProductController {
     // 🔹 5. LOW STOCK PRODUCTS
     @GetMapping("/low-stock")
     public ApiResponse<PageResponse<ProductDto>> getLowStockProducts(
-            @RequestParam Long vendorId,
             @RequestParam(defaultValue = "5") int threshold,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        Long vendorId = VendorContext.getVendorId();
+
         Page<ProductDto> productPage =
                 productService.getLowStockProducts(
                         vendorId, threshold, page, size
@@ -96,27 +101,27 @@ public class ProductController {
         return buildPageResponse(productPage, "Low stock products fetched");
     }
 
-    // 🔹 6. UPDATE PRODUCT
+    // 🔹 6. UPDATE PRODUCT (vendor-safe)
     @PutMapping("/{id}")
     public ApiResponse<ProductDto> updateProduct(
             @PathVariable Long id,
-            @RequestBody ProductUpdateDto dto
+            @Valid @RequestBody ProductUpdateDto dto
     ) {
-        return ApiResponse.<ProductDto>builder()
-                .success(true)
-                .message("Product updated successfully")
-                .data(productService.update(id, dto))
-                .build();
+        Long vendorId = VendorContext.getVendorId();
+
+        return ApiResponse.success(
+                productService.update(id, dto, vendorId)
+        );
     }
 
-    // 🔹 7. DELETE PRODUCT
+    // 🔹 7. DELETE PRODUCT (vendor-safe)
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteProduct(@PathVariable Long id) {
-        productService.delete(id);
-        return ApiResponse.<Void>builder()
-                .success(true)
-                .message("Product deleted successfully")
-                .build();
+    public ApiResponse<Void> deleteProduct(
+            @PathVariable Long id
+    ) {
+        Long vendorId = VendorContext.getVendorId();
+        productService.delete(id, vendorId);
+        return ApiResponse.success(null);
     }
 
     // 🔹 COMMON METHOD TO BUILD PAGE RESPONSE

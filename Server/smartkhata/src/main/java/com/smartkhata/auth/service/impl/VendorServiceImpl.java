@@ -1,6 +1,7 @@
 package com.smartkhata.auth.service.impl;
 
 import com.smartkhata.auth.dto.VendorDto;
+import com.smartkhata.auth.dto.VendorResponseDto;
 import com.smartkhata.auth.entity.Vendor;
 import com.smartkhata.auth.repository.VendorRepository;
 import com.smartkhata.common.exception.ResourceNotFoundException;
@@ -19,6 +20,14 @@ public class VendorServiceImpl implements VendorService {
 
     private final VendorRepository vendorRepository;
     private final ModelMapper mapper;
+
+    @Override
+    public VendorResponseDto getById(Long vendorId) {
+        Vendor vendor = vendorRepository.findById(vendorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found"));
+
+        return mapper.map(vendor, VendorResponseDto.class);
+    }
 
     @Override
     public VendorDto create(VendorDto dto) {

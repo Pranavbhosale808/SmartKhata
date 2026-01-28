@@ -4,7 +4,7 @@ import { loginUser } from "../api/authApi";
 import { toast } from "react-toastify";
 import "../App.css";
 
-export default function LoginPage() {
+export default function Login() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -162,3 +162,7 @@ export default function LoginPage() {
     </div>
   );
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8537c00f95939b3c67a93305d9ca87b1060fa819

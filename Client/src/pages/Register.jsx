@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { ownerSignup, staffSignup } from "../api/authApi";
 import "../App.css";
 
-export default function RegisterPage() {
+export default function Register() {
   const navigate = useNavigate();
   const [type, setType] = useState("owner");
   const [agree, setAgree] = useState(false);
@@ -262,5 +262,10 @@ export default function RegisterPage() {
 
       </div>
     </div>
+<<<<<<< HEAD
   );
 }
+=======
+  )
+}
+>>>>>>> 8537c00f95939b3c67a93305d9ca87b1060fa819

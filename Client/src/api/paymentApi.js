@@ -19,9 +19,4 @@ export const getPayments = (params) =>
 export const getPaymentsByDateRange = (start, end, page = 0, size = 10) =>
   api.get("/payments/date-range", {
     params: { start, end, page, size },
-<<<<<<< HEAD
   });
-
-=======
-  });
->>>>>>> 8537c00f95939b3c67a93305d9ca87b1060fa819

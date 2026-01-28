@@ -1,9 +1,5 @@
 import DashboardLayout from "../layouts/DashboardLayout";
-<<<<<<< HEAD
 import usePayments from "../hooks/usePayments";
-=======
-import usePayments from "../hooks/usePayment";
->>>>>>> 8537c00f95939b3c67a93305d9ca87b1060fa819
 
 export default function Payments() {
   const {

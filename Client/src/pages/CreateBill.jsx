@@ -3,6 +3,7 @@ import BillingLayout from "../layouts/BillingLayout";
 import ProductPicker from "../components/billing/ProductPicker";
 import BillItemsTable from "../components/billing/BillItemsTable";
 import { createBill } from "../api/billApi";
+import { createRazorpayOrder, verifyRazorpayPayment, recordCashPayment } from "../api/paymentApi";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import BillPreviewModal from "../components/billing/BillPreviewModal";
@@ -18,8 +19,8 @@ export default function CreateBill() {
   const [customerName, setCustomerName] = useState("");
   const [customerMobile, setCustomerMobile] = useState("");
 
-  const [status, setStatus] = useState("PAID");       // PAID | CREDIT
-  const [paymentMode, setPaymentMode] = useState("CASH"); // CASH | ONLINE
+  const [status, setStatus] = useState("PAID");
+  const [paymentMode, setPaymentMode] = useState("CASH");
 
   const [items, setItems] = useState([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -29,7 +30,7 @@ export default function CreateBill() {
     setBillNumber("SK-" + Date.now());
   }, []);
 
-  /* ---------------- ADD PRODUCT ---------------- */
+  /* ---------------- PRODUCTS ---------------- */
 
   const addProduct = (product) => {
     const exists = items.find((i) => i.productId === product.id);
@@ -38,11 +39,7 @@ export default function CreateBill() {
       setItems((prev) =>
         prev.map((i) =>
           i.productId === product.id
-            ? {
-                ...i,
-                quantity: i.quantity + 1,
-                lineTotal: (i.quantity + 1) * i.unitPriceSnapshot,
-              }
+            ? { ...i, quantity: i.quantity + 1, lineTotal: (i.quantity + 1) * i.unitPriceSnapshot }
             : i
         )
       );
@@ -60,11 +57,8 @@ export default function CreateBill() {
     }
   };
 
-  /* ---------------- UPDATE QTY ---------------- */
-
   const updateQty = (id, qty) => {
     if (qty < 1) return;
-
     setItems((prev) =>
       prev.map((i) =>
         i.productId === id
@@ -87,17 +81,14 @@ export default function CreateBill() {
       toast.error("Customer name is required");
       return false;
     }
-
     if (!/^[6-9]\d{9}$/.test(customerMobile)) {
       toast.error("Mobile number must be 10 digits");
       return false;
     }
-
     if (items.length === 0) {
       toast.error("Please add at least one product");
       return false;
     }
-
     return true;
   };
 
@@ -116,36 +107,48 @@ export default function CreateBill() {
     })),
   });
 
-  /* ---------------- CREATE ONLY ---------------- */
+  /* ---------------- RAZORPAY FLOW ---------------- */
 
-  const createOnly = async () => {
-    try {
-      setProcessing(true);
-      await createBill(buildPayload());
-      toast.success("Bill created successfully");
-      navigate("/bills");
-    } finally {
-      setProcessing(false);
-    }
-  };
+  const openRazorpay = async (billId) => {
+    // 1. create backend order
+    const orderRes = await createRazorpayOrder({
+      billId,
+      amount: total,
+    });
 
-  /* ---------------- RAZORPAY ---------------- */
+    const orderId = orderRes.data.data;
 
-  const openRazorpay = (billId) => {
+    // 2. open razorpay checkout
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: Math.round(total * 100),
       currency: "INR",
       name: "SmartKhata",
       description: `Bill #${billNumber}`,
-      handler: function () {
-        toast.success("Payment Successful");
-        navigate("/bills");
+      order_id: orderId,
+
+      handler: async function (response) {
+        try {
+          // 3. verify payment in backend
+          await verifyRazorpayPayment({
+            billId,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          });
+
+          toast.success("Payment successful");
+          navigate("/bills");
+        } catch {
+          toast.error("Payment verification failed");
+        }
       },
+
       prefill: {
         name: customerName,
         contact: customerMobile,
       },
+
       theme: { color: "#000000" },
     };
 
@@ -153,13 +156,13 @@ export default function CreateBill() {
     rzp.open();
   };
 
-  /* ---------------- MAIN BUTTON ---------------- */
+  /* ---------------- MAIN ACTION ---------------- */
 
   const mainAction = () => {
     if (!validate()) return;
 
     if (status === "CREDIT") {
-      createOnly();
+      setShowPreview(true);
     } else {
       setShowPreview(true);
     }
@@ -179,35 +182,18 @@ export default function CreateBill() {
 
         {/* CUSTOMER INFO */}
         <div className="bg-white shadow rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input
-            placeholder="Customer Name"
-            className="border p-2 rounded focus:ring-2 focus:ring-black/60"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
+          <input placeholder="Customer Name" className="border p-2 rounded"
+            value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
 
-          <input
-            placeholder="Mobile Number"
-            maxLength={10}
-            className="border p-2 rounded focus:ring-2 focus:ring-black/60"
+          <input placeholder="Mobile Number" maxLength={10} className="border p-2 rounded"
             value={customerMobile}
-            onChange={(e) =>
-              setCustomerMobile(e.target.value.replace(/\D/g, ""))
-            }
-          />
+            onChange={(e) => setCustomerMobile(e.target.value.replace(/\D/g, ""))} />
 
-          <input
-            type="date"
-            className="border p-2 rounded focus:ring-2 focus:ring-black/60"
-            value={billDate}
-            onChange={(e) => setBillDate(e.target.value)}
-          />
+          <input type="date" className="border p-2 rounded"
+            value={billDate} onChange={(e) => setBillDate(e.target.value)} />
 
-          <select
-            className="border p-2 rounded focus:ring-2 focus:ring-black/60"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
+          <select className="border p-2 rounded"
+            value={status} onChange={(e) => setStatus(e.target.value)}>
             <option value="PAID">PAID</option>
             <option value="CREDIT">CREDIT</option>
           </select>
@@ -216,23 +202,13 @@ export default function CreateBill() {
         {/* PAYMENT MODE */}
         {status === "PAID" && (
           <div className="bg-white shadow rounded-xl p-4 flex gap-4">
-            <button
-              onClick={() => setPaymentMode("CASH")}
-              className={`px-5 py-2 rounded-lg border font-semibold
-                ${paymentMode === "CASH"
-                  ? "bg-black text-white"
-                  : "bg-white"}`}
-            >
+            <button onClick={() => setPaymentMode("CASH")}
+              className={`px-5 py-2 rounded-lg border font-semibold ${paymentMode === "CASH" ? "bg-black text-white" : ""}`}>
               💵 Cash
             </button>
 
-            <button
-              onClick={() => setPaymentMode("ONLINE")}
-              className={`px-5 py-2 rounded-lg border font-semibold
-                ${paymentMode === "ONLINE"
-                  ? "bg-black text-white"
-                  : "bg-white"}`}
-            >
+            <button onClick={() => setPaymentMode("ONLINE")}
+              className={`px-5 py-2 rounded-lg border font-semibold ${paymentMode === "ONLINE" ? "bg-black text-white" : ""}`}>
               💳 Online
             </button>
           </div>
@@ -245,38 +221,22 @@ export default function CreateBill() {
 
         {/* ITEMS */}
         <div className="bg-white shadow rounded-xl p-4">
-          <BillItemsTable
-            items={items}
-            onQtyChange={updateQty}
-            onRemove={removeItem}
-          />
+          <BillItemsTable items={items} onQtyChange={updateQty} onRemove={removeItem} />
         </div>
 
         {/* FOOTER */}
-        <div className="sticky bottom-0 bg-white shadow-xl rounded-xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="sticky bottom-0 bg-white shadow-xl rounded-xl p-4 flex justify-between items-center">
           <div className="text-xl font-bold">
-            Grand Total:{" "}
-            <span className="text-green-600">₹ {total.toFixed(2)}</span>
+            Grand Total: <span className="text-green-600">₹ {total.toFixed(2)}</span>
           </div>
 
-          <button
-            disabled={items.length === 0 || processing}
+          <button disabled={items.length === 0 || processing}
             onClick={mainAction}
-            className={`px-8 py-2 rounded-lg font-semibold transition
-              ${
-                items.length === 0 || processing
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  : status === "PAID"
-                  ? "bg-green-600 text-white hover:opacity-90"
-                  : "bg-black text-white hover:opacity-90"
-              }`}
-          >
-            {processing
-              ? "Processing..."
-              : status === "CREDIT"
+            className="px-8 py-2 rounded-lg font-semibold bg-green-600 text-white">
+            {status === "CREDIT"
               ? "Save Bill"
               : paymentMode === "CASH"
-              ? "Confirm Cash Payment"
+              ? "Confirm Cash"
               : "Pay Online"}
           </button>
         </div>
@@ -295,13 +255,19 @@ export default function CreateBill() {
             setShowPreview(false);
 
             const res = await createBill(buildPayload());
+            const billId = res.data.data.billId;
 
-            if (paymentMode === "ONLINE") {
-              openRazorpay(res.data.data.billId);
-            } else {
+            if (status === "CREDIT") {
+              toast.success("Credit bill created");
+              navigate("/bills");
+            } else if (paymentMode === "CASH") {
+              await recordCashPayment({ billId, amount: total });
               toast.success("Cash payment recorded");
               navigate("/bills");
+            } else {
+              await openRazorpay(billId);
             }
+
           } finally {
             setProcessing(false);
           }

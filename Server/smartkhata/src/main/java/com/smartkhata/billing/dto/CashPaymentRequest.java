@@ -1,15 +1,12 @@
 package com.smartkhata.billing.dto;
 
-import java.math.BigDecimal;
-
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import java.math.BigDecimal;
 
-@Getter @Setter
+@Getter
+@Setter
 public class CashPaymentRequest {
-	@NotNull
     private Long billId;
-	@NotNull
     private BigDecimal amount;
 }

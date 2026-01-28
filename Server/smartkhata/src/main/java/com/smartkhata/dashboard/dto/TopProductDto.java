@@ -9,6 +9,6 @@ import lombok.*;
 @Builder
 public class TopProductDto {
 
-    private Long productId;
+    private String productName;
     private Long quantity;
 }

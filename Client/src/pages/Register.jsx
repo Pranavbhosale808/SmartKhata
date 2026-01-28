@@ -263,8 +263,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 5e4495112a050be655847cf47111205d90b8dc60

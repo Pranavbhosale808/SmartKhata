@@ -48,6 +48,18 @@ public class BillServiceImpl implements BillService {
                     .findByIdAndVendorId(i.getProductId(), vendorId)
                     .orElseThrow(() -> new RuntimeException("Product not found"));
 
+            // ✅ 1. STOCK VALIDATION
+            if (product.getQuantity() < i.getQuantity()) {
+                throw new RuntimeException(
+                    "Insufficient stock for product: " + product.getName()
+                );
+            }
+
+            // ✅ 2. REDUCE STOCK
+            product.setQuantity(product.getQuantity() - i.getQuantity());
+            productRepository.save(product);
+
+            // ✅ 3. BUILD BILL ITEM
             BigDecimal lineTotal =
                     i.getUnitPriceSnapshot()
                             .multiply(BigDecimal.valueOf(i.getQuantity()));
@@ -70,6 +82,7 @@ public class BillServiceImpl implements BillService {
         Bill saved = billRepository.save(bill);
         return mapper.map(saved, BillDto.class);
     }
+
 
     // ---------------- READ ONE ----------------
 

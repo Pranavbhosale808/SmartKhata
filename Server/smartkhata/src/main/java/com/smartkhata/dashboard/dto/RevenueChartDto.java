@@ -11,6 +11,6 @@ import java.math.BigDecimal;
 @Builder
 public class RevenueChartDto {
 
-    private String month;
-    private BigDecimal amount;
+    private String label;       // e.g. "Jan", "Feb", "Mar" OR "2026-01-28"
+    private BigDecimal amount;  // total revenue for that period
 }

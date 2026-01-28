@@ -65,6 +65,7 @@ public class Bill {
     @CreationTimestamp
     
     private LocalDateTime createdAt;
-    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments = new ArrayList<>();
+
 }

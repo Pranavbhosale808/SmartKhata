@@ -9,6 +9,6 @@ import lombok.*;
 @Builder
 public class PaymentMethodDto {
 
-    private String name;
-    private Long value;
+    private String name;   // CASH, RAZORPAY
+    private Long value;    // count
 }

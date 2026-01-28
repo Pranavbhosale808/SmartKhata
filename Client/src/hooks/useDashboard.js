@@ -16,35 +16,36 @@ export default function useDashboard(from, to) {
   const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
-    setLoading(true);
+    const load = async () => {
+      try {
+        setLoading(true);
 
-    Promise.all([
-      fetchDashboardStats(),
-      fetchRevenueChart(from, to),
-      fetchTopProducts(),
-      fetchPaymentMethods(),
-      fetchAlerts(),
-    ])
-      .then(
-        ([
+        const [
           statsRes,
           revenueRes,
           productsRes,
           paymentsRes,
           alertsRes,
-        ]) => {
-          setStats(statsRes.data.data);
-          setRevenue(revenueRes.data.data);
-          setProducts(productsRes.data.data);
-          setPayments(paymentsRes.data.data);
-          setAlerts(alertsRes.data.data);
-        }
-      )
-      .catch((err) => {
-        
-        console.error("Dashboard API error", err);
-      })
-      .finally(() => setLoading(false));
+        ] = await Promise.all([
+          fetchDashboardStats(),
+          fetchRevenueChart(from, to),
+          fetchTopProducts(),
+          fetchPaymentMethods(),
+          fetchAlerts(),
+        ]);
+
+        setStats(statsRes.data.data);
+        setRevenue(revenueRes.data.data);
+        setProducts(productsRes.data.data);
+        setPayments(paymentsRes.data.data);
+        setAlerts(alertsRes.data.data);
+
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
   }, [from, to]);
 
   return {

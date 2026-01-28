@@ -1,20 +1,12 @@
 package com.smartkhata.billing.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
@@ -29,7 +21,8 @@ public class Payment {
     @Column(nullable = false)
     private Long vendorId;
 
-    @ManyToOne
+    // 🔥 IMPORTANT: bill_id will NEVER be null now
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
@@ -37,18 +30,15 @@ public class Payment {
     private BigDecimal amount;
 
     @Column(nullable = false)
-    private String method; 
-    // CASH, RAZORPAY
+    private String method; // CASH, RAZORPAY
 
     private String razorpayOrderId;
     private String razorpayPaymentId;
     private String razorpaySignature;
 
     @Column(nullable = false)
-    private String status; 
-    // SUCCESS, FAILED
+    private String status; // SUCCESS, FAILED
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 }
-

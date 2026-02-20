@@ -14,10 +14,10 @@ public class JwtUtil {
             "SMARTKHATA_SECRET_KEY_123456789_SMARTKHATA";
 
     private static final long ACCESS_TOKEN_EXPIRATION =
-            15 * 60 * 1000; // 15 minutes
+            15 * 60 * 1000;
 
     private static final long REFRESH_TOKEN_EXPIRATION =
-            7 * 24 * 60 * 60 * 1000; // 7 days
+            7 * 24 * 60 * 60 * 1000; 
 
     private final Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
 

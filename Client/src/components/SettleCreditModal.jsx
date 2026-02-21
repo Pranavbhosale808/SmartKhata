@@ -7,7 +7,7 @@ export default function SettleCreditModal({ bill, isOpen, onClose, onSuccess }) 
   if (!isOpen || !bill) return null;
 
   const submit = async () => {
-    await axios.post("http://localhost:8080/api/payments", {
+    await axios.post("https://smartkhata-server.onrender.com/api/payments", {
       billId: bill.billId,
       amountPaid: amount,
       method: "CASH"
